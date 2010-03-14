@@ -1,0 +1,10 @@
+Kleines Framework-unabhängiges JavaScript, welches beim Markieren von Text
+ein Kontextmenü anzeigt. Idee und Umsetzung ähnelt der auf nytimes.com.
+Das Script ist jedoch einfacher und universell einsetzbarer.
+
+Das Script nutzt DOM-Ranges bzw. TextRanges im IE. Es fügt ein Inline-Element
+ans Ende des markierten Textes ein. Das kann Links enthalten, z.B. um Wörter
+nachzuschlagen oder Begriffe zu suchen.
+
+Autor: Mathias Schäfer (molily) <zapperlott@gmail.com>
+Lizenz: Public Domain
