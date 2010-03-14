@@ -53,7 +53,6 @@ var SelectionMenu = (function () {
 	}
 	
 	// Konstruktorfunktion
-	
 	function SelectionMenu (options) {
 		var instance = this;
 		
@@ -181,6 +180,7 @@ var SelectionMenu = (function () {
 				
 				// Erzeuge neue (leere) Range
 				var newRange = document.createRange();
+				
 				// Verschiebe Anfang der neuen Range an das Ende der Auswahl
 				var order = selection.anchorNode.compareDocumentPosition(selection.focusNode);
 				if (order & 2) {
@@ -197,13 +197,17 @@ var SelectionMenu = (function () {
 				
 				// Kopiere TextRange
 				var newRange = selection.duplicate();
+				
 				// Verschiebe Anfang der neuen Range an das Ende der Auswahl
 				newRange.setEndPoint('StartToEnd', selection);
-				console.log("htmlText: " + selection.htmlText + "\ntext" + selection.text);
 				
 				// Befülle Menü-Span
 				span.innerHTML = instance.menuHTML;
 				newRange.pasteHTML(span.outerHTML);
+				
+				// Korrigiere Auswahl und setze sie auf die ursprüngliche Auswahl zurück,
+				// sodass das Menü nicht selektiert ist (passiert in manchen Fällen)
+				selection.select();
 				
 				// Da das Befüllen nicht über das DOM, sondern über serialisierten HTML-Code erfolgt,
 				// stellen wir die Referenz wieder her sowie den Event-Handler
