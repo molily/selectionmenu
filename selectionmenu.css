@@ -1,0 +1,55 @@
+#selection-menu {
+	position: absolute;
+	margin-left: -25px;
+	background: #f8f8f8;
+	border: 1px solid #555;
+	font-size: 13px;
+	
+	-moz-box-shadow: 1px 1px 4px #aaa;
+	-webkit-box-shadow: 1px 1px 4px #aaa;
+	box-shadow: 1px 1px 4px #aaa;
+	
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 4px;
+	
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+#selection-menu::selection {
+	/* Opera fix - Opera sometimes selects the menu text */
+	background: transparent;
+}
+
+#selection-menu:after {
+	content: "\00a0";
+	display: block;
+	position: absolute;
+	bottom: -12px;
+	left: 10px;
+	width: 0;
+	height: 0;
+	border-width: 6px;
+	border-style: solid;
+	border-color: #555 transparent transparent;
+}
+
+#selection-menu a {
+	display: block;
+	border-bottom: 1px solid #aaa;
+	padding: 0 4px;
+	color: #111;
+	text-decoration: none;
+	font: 12px/1.4 arial, sans-serif;
+}
+
+#selection-menu a:last-child {
+	border-bottom: 0;
+}
+
+#selection-menu a:hover {
+	background: #f0f0f0;
+	cursor: pointer;
+}
