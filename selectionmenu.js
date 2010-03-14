@@ -1,3 +1,5 @@
+// Erzeuge einen privaten Scope durch eine anonyme Funktion,
+// speichere den Rückgabwert in einer globalen Variable
 var SelectionMenu = (function () {
 	
 	var id = 'selection-menu';
@@ -6,6 +8,7 @@ var SelectionMenu = (function () {
 	// Geteilte private Helferfunktionen
 	
 	function addEvent (obj, type, fn) {
+		// Fähigkeitenweiche W3C-DOM / Microsoft
 		if (obj.addEventListener) {
 			obj.addEventListener(type, fn, false);
 		} else if (obj.attachEvent) {
@@ -16,28 +19,34 @@ var SelectionMenu = (function () {
 	}
 	
 	// Mache addEvent als statische Methode öffentlich
+	// (hefte die Methode an den Konstruktor, der zurückgegeben wird)
 	SelectionMenu.addEvent = addEvent;
 	
 	function getSelection () {
+		// Fähigkeitenweiche Mozilla / Microsoft
 		if (window.getSelection) {
 			return window.getSelection();
 		} else if (document.selection && document.selection.createRange) {
 			return document.selection.createRange();
 		} else {
+			// Keine Unterstützung
 			return false;
 		}
 	}
 	
 	function getSelectedText (selection) {
+		// Fähigkeitenweiche Mozilla / Microsoft
 		return selection.toString ? selection.toString() : selection.text;
 	}
 	
 	function contains (a, b) {
+		// Fähigkeitenweiche Microsoft / Mozilla
 		return a.contains ? a.contains(b) : !!(a.compareDocumentPosition(b) & 16);
 	}
 	
 	function mouseOnMenu (e) {
 		// Greife auf das Zielelement des Ereignisses zu
+		// Fähigkeitenweiche W3C-DOM / Microsoft
 		var target = e.target || e.srcElement;
 		// Ist das Zielelement das Menü oder darin enthalten?
 		return target == span || contains(span, target);
@@ -71,9 +80,6 @@ var SelectionMenu = (function () {
 			
 			span = document.createElement('span');
 			span.id = id;
-			span.unselectable = true;
-			
-			instance.setupMenuClick();
 		},
 		
 		setupEvents : function () {
@@ -89,25 +95,19 @@ var SelectionMenu = (function () {
 			// Füge ein beim Mouseup (wenn Text ausgewählt wurde)
 			addEvent(container, 'mouseup', function (e) {
 				instance.insert(e);
+				
+				// Prüfe nach einer Verzögerung, ob in die vorhandene Auswahl
+				// angeklickt wurde und die Auswahl damit aufgehoben wurde
+				window.setTimeout(function () {
+					instance.hideIfNoSelection();
+				}, 1);
+				
 			});
 			
-			// Wenn in eine Auswahl geklickt wird, ist die Auswahl zum Zeitpunkt
-			// des mouseup-Ereignis noch nicht aufgehoben. Daher prüfen wir
-			// beim anschließenden click-Ereignis nach.
-			addEvent(container, 'click', function (e) {
-				var selection = getSelection();
-				if (!selection) {
-					return;
-				}
-				var selectedText = getSelectedText(selection);
-				console.log('click', selectedText);
-				if (!selectedText.length) {
-					instance.hide(e);
-				}
-			});
+			instance.setupMenuEvents();
 		},
 		
-		setupMenuClick : function () {
+		setupMenuEvents : function () {
 			var instance = this;
 			
 			// Registiere Handlerfunktion für den Klick auf das Menü
@@ -115,10 +115,15 @@ var SelectionMenu = (function () {
 				instance.handler.call(instance, e);
 				return false;
 			});
+			
+			// Verhindere das Markieren des Menüs im IE
+			addEvent(span, 'selectstart',  function () { 
+				return false;
+			});
 		},
 		
 		hide : function (e) {
-			// Breche ab, wenn Event-Objekt übergeben wurde und das Mausereignis beim Menü passierte
+			// Breche ab, wenn Event-Objekt übergeben wurde und der Klick beim Menü passierte
 			if (e && mouseOnMenu(e)) {
 				return;
 			}
@@ -128,6 +133,18 @@ var SelectionMenu = (function () {
 				// Entferne es aus dem DOM-Baum (Element bleibt im Speicher erhalten
 				// und wird später wiederverwendet)
 				parent.removeChild(span);
+			}
+		},
+		
+		hideIfNoSelection : function () {
+			var instance = this;
+			var selection = getSelection();
+			if (!selection) {
+				return;
+			}
+			var selectedText = getSelectedText(selection);
+			if (!selectedText.length) {
+				instance.hide();
 			}
 		},
 		
@@ -142,6 +159,7 @@ var SelectionMenu = (function () {
 			// Hole Selection bzw. TextRange (IE)
 			var selection = getSelection();
 			if (!selection) {
+				// Keine Unterstützung
 				return;
 			}
 			
@@ -155,7 +173,9 @@ var SelectionMenu = (function () {
 				return;
 			}
 			
+			// Fähigkeitenweiche Mozilla / Microsoft
 			if (selection.getRangeAt) {
+				
 				// Hole Range, die zur Selection gehört
 				var range = selection.getRangeAt(0);
 				
@@ -174,10 +194,12 @@ var SelectionMenu = (function () {
 				newRange.insertNode(span);
 				
 			} else if (selection.duplicate) {
+				
 				// Kopiere TextRange
 				var newRange = selection.duplicate();
-				// Verschiebe Ende der neuen Range an das Ende der Auswahl
+				// Verschiebe Anfang der neuen Range an das Ende der Auswahl
 				newRange.setEndPoint('StartToEnd', selection);
+				console.log("htmlText: " + selection.htmlText + "\ntext" + selection.text);
 				
 				// Befülle Menü-Span
 				span.innerHTML = instance.menuHTML;
@@ -186,12 +208,14 @@ var SelectionMenu = (function () {
 				// Da das Befüllen nicht über das DOM, sondern über serialisierten HTML-Code erfolgt,
 				// stellen wir die Referenz wieder her sowie den Event-Handler
 				span = document.getElementById(id);
-				instance.setupMenuClick();
+				instance.setupMenuEvents();
 				
 			} else {
+				// Keine Unterstützung
 				return;
 			}
 			
+			// Positioniere Menü
 			instance.position();
 		},
 		
@@ -200,5 +224,6 @@ var SelectionMenu = (function () {
 		}
 	};
 	
+	// Gebe Konstruktor zurück
 	return SelectionMenu;
 })();
