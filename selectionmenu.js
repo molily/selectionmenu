@@ -8,7 +8,7 @@ var SelectionMenu = (function () {
 	// Geteilte private Helferfunktionen
 	
 	function addEvent (obj, type, fn) {
-		// Fähigkeitenweiche W3C-DOM / Microsoft
+		// Fähigkeitenweiche DOM Events / Microsoft
 		if (obj.addEventListener) {
 			obj.addEventListener(type, fn, false);
 		} else if (obj.attachEvent) {
@@ -23,30 +23,46 @@ var SelectionMenu = (function () {
 	SelectionMenu.addEvent = addEvent;
 	
 	function getSelection () {
-		// Fähigkeitenweiche Mozilla / Microsoft
+		// Fähigkeitenweiche HTML5 / Microsoft
 		if (window.getSelection) {
 			return window.getSelection();
 		} else if (document.selection && document.selection.createRange) {
 			return document.selection.createRange();
 		} else {
-			// Keine Unterstützung
+			// Keine Browser-Unterstützung für die benötigten Features
 			return false;
 		}
 	}
 	
 	function getSelectedText (selection) {
-		// Fähigkeitenweiche Mozilla / Microsoft
+		// Fähigkeitenweiche HTML5 / Microsoft
 		return selection.toString ? selection.toString() : selection.text;
 	}
 	
 	function contains (a, b) {
-		// Fähigkeitenweiche Microsoft / Mozilla
-		return a.contains ? a.contains(b) : !!(a.compareDocumentPosition(b) & 16);
+		// Fähigkeitenweiche DOM Core / Microsoft
+		return a.compareDocumentPosition ? !!(a.compareDocumentPosition(b) & 16) : a.contains(b);
+	}
+	
+	function succeedingNode (a, b) {
+		// Fähigkeitenweiche DOM Core / Microsoft
+		if (a.compareDocumentPosition) {
+			return a.compareDocumentPosition(b) & 2 ? a : b;
+		} else {
+			var elementA = a.nodeType == 3 ? a.parentNode : a;
+			var elementB = b.nodeType == 3 ? b.parentNode : b;
+			if (typeof elementA.sourceIndex == 'number' && typeof elementB.sourceIndex == 'number') {
+				return elementA.sourceIndex > elementB.sourceIndex ? a : b;
+			} else {
+				// Keine Browser-Unterstützung für die benötigten Features
+				return false;
+			}
+		}
 	}
 	
 	function mouseOnMenu (e) {
 		// Greife auf das Zielelement des Ereignisses zu
-		// Fähigkeitenweiche W3C-DOM / Microsoft
+		// Fähigkeitenweiche DOM Events / Microsoft
 		var target = e.target || e.srcElement;
 		// Ist das Zielelement das Menü oder darin enthalten?
 		return target == span || contains(span, target);
@@ -116,9 +132,12 @@ var SelectionMenu = (function () {
 			});
 			
 			// Verhindere das Markieren des Menüs im IE
+			span.unselectable = true;
+			/*
 			addEvent(span, 'selectstart',  function () { 
 				return false;
 			});
+			*/
 		},
 		
 		hide : function (e) {
@@ -158,7 +177,7 @@ var SelectionMenu = (function () {
 			// Hole Selection bzw. TextRange (IE)
 			var selection = getSelection();
 			if (!selection) {
-				// Keine Unterstützung
+				// Keine Browser-Unterstützung für die benötigten Features
 				return;
 			}
 			
@@ -172,7 +191,7 @@ var SelectionMenu = (function () {
 				return;
 			}
 			
-			// Fähigkeitenweiche Mozilla / Microsoft
+			// Fähigkeitenweiche DOM Range / Microsoft
 			if (selection.getRangeAt) {
 				
 				// Hole Range, die zur Selection gehört
@@ -182,16 +201,30 @@ var SelectionMenu = (function () {
 				var newRange = document.createRange();
 				
 				// Verschiebe Anfang der neuen Range an das Ende der Auswahl
-				var order = selection.anchorNode.compareDocumentPosition(selection.focusNode);
-				if (order & 2) {
-					newRange.setStart(selection.anchorNode, range.endOffset);
-				} else {
-					newRange.setStart(selection.focusNode, range.endOffset);
+				var endNode = succeedingNode(selection.anchorNode, selection.focusNode);
+				if (!endNode) {
+					return;
 				}
+				var endOffset = range.endOffset;
+				
+				// Falls der Endknoten ein Element ist, nehme das Ende des letzten Textknoten
+				if (endNode.nodeType == 1) {
+					var endNode = endNode.lastChild;
+					if (!endNode || endNode.nodeType != 3) {
+						return;
+					}
+					endOffset = endNode.data.length;
+				}
+				
+				newRange.setStart(endNode, endOffset);
 				
 				// Befülle Menü-Span
 				span.innerHTML = instance.menuHTML;
 				newRange.insertNode(span);
+				
+				// Korrigiere Auswahl, verhindere das Markieren des Menüs (umschifft IE-Bugs)
+				selection.removeAllRanges();
+				selection.addRange(range);
 				
 			} else if (selection.duplicate) {
 				
@@ -215,7 +248,7 @@ var SelectionMenu = (function () {
 				instance.setupMenuEvents();
 				
 			} else {
-				// Keine Unterstützung
+				// Keine Browser-Unterstützung für die benötigten Features
 				return;
 			}
 			

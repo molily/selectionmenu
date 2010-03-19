@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="utf-8">
 <title>SelectionMenu Example</title>
 <link rel="stylesheet" href="selectionmenu.css">
 <style>
@@ -24,13 +25,16 @@ SelectionMenu.addEvent(window, 'load', function () {
 			var target = e.target || e.srcElement,
 				id = target.id,
 				selectedText = this.selectedText,
-				query = encodeURI(selectedText.replace(/\s/g, '+'));
+				query = encodeURI(selectedText.replace(/\s/g, '+')),
+				searchURI;
 			
 			if (id == 'selection-menu-google') {
-				location.href = 'http://www.google.de/search?ie=utf-8&q=' + query;
+				searchURI = 'http://www.google.de/search?ie=utf-8&q=';
 			} else if (id == 'selection-menu-bing') {
-				location.href = 'http://www.bing.com/search?q=' + query;
+				searchURI = 'http://www.bing.com/search?q=';
 			}
+			
+			location.href = searchURI + query;
 		}
 	});
 	
