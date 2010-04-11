@@ -1,9 +1,9 @@
 // Erzeuge einen privaten Scope durch eine anonyme Funktion,
 // speichere den Rückgabwert in einer globalen Variable
-var SelectionMenu = (function () {
+var CopyLink = (function () {
 	
-	var id = 'selection-menu';
 	var span = null;
+	var id = 'copylink';
 	
 	// Geteilte private Helferfunktionen
 	
@@ -20,7 +20,7 @@ var SelectionMenu = (function () {
 	
 	// Mache addEvent als statische Methode öffentlich
 	// (hefte die Methode an den Konstruktor, der zurückgegeben wird)
-	SelectionMenu.addEvent = addEvent;
+	CopyLink.addEvent = addEvent;
 	
 	function getSelection () {
 		// Fähigkeitenweiche HTML5 / Microsoft
@@ -39,35 +39,31 @@ var SelectionMenu = (function () {
 		return selection.toString ? selection.toString() : selection.text;
 	}
 	
-	function contains (a, b) {
-		// Fähigkeitenweiche DOM Core / Microsoft
-		return a.compareDocumentPosition ? !!(a.compareDocumentPosition(b) & 16) : a.contains(b);
-	}
-	
-	function mouseOnMenu (e) {
-		// Greife auf das Zielelement des Ereignisses zu
-		// Fähigkeitenweiche DOM Events / Microsoft
-		var target = e.target || e.srcElement;
-		// Ist das Zielelement das Menü oder darin enthalten?
-		return target == span || contains(span, target);
+	function removeSpan () {
+		var parent = span.parentNode;
+		if (parent) {
+			// Entferne span aus dem DOM-Baum
+			parent.removeChild(span);
+		}
 	}
 	
 	// Konstruktorfunktion
-	function SelectionMenu (options) {
+	function CopyLink (options) {
 		var instance = this;
 		
 		// Kopiere Einstellungen aus dem options-Objekt herüber zur Instanz
-		instance.menuHTML = options.menuHTML;
-		instance.minimalSelection = options.minimalSelection || 5;
+		instance.minimalSelection = options.minimalSelection || 20;
 		instance.container = options.container;
-		instance.handler = options.handler;
+		instance.handler = options.handler || function () {
+			'<br>Source: ' + location.href;
+		};
 		
 		// Initialisiere
 		instance.create();
 		instance.setupEvents();
 	}
 	
-	SelectionMenu.prototype = {
+	CopyLink.prototype = {
 		
 		create : function () {
 			var instance = this;
@@ -79,79 +75,18 @@ var SelectionMenu = (function () {
 			
 			span = document.createElement('span');
 			span.id = id;
+			span.style.cssText = 'position: absolute; left: -9999px;';
 		},
 		
 		setupEvents : function () {
-			
 			var instance = this;
-			var container = instance.container;
-			
-			// Verstecke beim Mousedown
-			addEvent(container, 'mousedown', function (e) {
-				instance.hide(e);
+			addEvent(instance.container, 'copy', function () {
+				instance.insert();
 			});
-			
-			// Füge ein beim Mouseup (wenn Text ausgewählt wurde)
-			addEvent(container, 'mouseup', function (e) {
-				instance.insert(e);
-				
-				// Prüfe nach einer Verzögerung, ob in die vorhandene Auswahl
-				// angeklickt wurde und die Auswahl damit aufgehoben wurde
-				window.setTimeout(function () {
-					instance.hideIfNoSelection();
-				}, 1);
-				
-			});
-			
-			instance.setupMenuEvents();
 		},
 		
-		setupMenuEvents : function () {
+		insert : function () {
 			var instance = this;
-			
-			// Registiere Handlerfunktion für den Klick auf das Menü
-			addEvent(span, 'click', function (e) {
-				instance.handler.call(instance, e);
-				return false;
-			});
-			
-			// Verhindere das Markieren des Menüs im IE
-			span.unselectable = true;
-		},
-		
-		hide : function (e) {
-			// Breche ab, wenn Event-Objekt übergeben wurde und der Klick beim Menü passierte
-			if (e && mouseOnMenu(e)) {
-				return;
-			}
-			// Ist das Element in den DOM-Baum gehängt?
-			var parent = span.parentNode;
-			if (parent) {
-				// Entferne es aus dem DOM-Baum (Element bleibt im Speicher erhalten
-				// und wird später wiederverwendet)
-				parent.removeChild(span);
-			}
-		},
-		
-		hideIfNoSelection : function () {
-			var instance = this;
-			var selection = getSelection();
-			if (!selection) {
-				return;
-			}
-			var selectedText = getSelectedText(selection);
-			if (!selectedText.length) {
-				instance.hide();
-			}
-		},
-		
-		insert : function (e) {
-			var instance = this;
-			
-			// Breche ab, wenn das Mausereignis beim Menü passierte
-			if (mouseOnMenu(e)) {
-				return;
-			}
 			
 			// Hole Selection bzw. TextRange (IE)
 			var selection = getSelection();
@@ -162,11 +97,9 @@ var SelectionMenu = (function () {
 			
 			// Hole markierten Text
 			var selectedText = getSelectedText(selection);
-			instance.selectedText = selectedText;
 			
 			// Breche ab, wenn der markierte Text zu kurz ist
 			if (selectedText.length < instance.minimalSelection) {
-				instance.hide(e);
 				return;
 			}
 			
@@ -193,7 +126,8 @@ var SelectionMenu = (function () {
 					var endNode = range.startContainer;
 				}
 				
-				// Hole End-Offset
+				// Hole Start- und End-Offset
+				var startOffset = range.startOffset;
 				var endOffset = range.endOffset;
 				
 				// Korrektur: Falls der Endknoten ein Element ist, nehme das Ende des letzten Textknoten
@@ -209,14 +143,31 @@ var SelectionMenu = (function () {
 				newRange.setStart(endNode, endOffset);
 				
 				// Befülle Menü-Span
-				span.innerHTML = instance.menuHTML;
+				span.innerHTML = instance.handler();
 				
 				// Füge das span-Element in die neue Range ein
 				newRange.insertNode(span);
 				
-				// Korrigiere Auswahl, verhindere das Markieren des Menüs
+				// Erweitere Range nach vorne, um die ursprüngliche einzuschließen
+				
+				// Schließe span in die Auswahl ein
+				range.setEndAfter(span);
+				
+				// Selektiere Range
 				selection.removeAllRanges();
 				selection.addRange(range);
+				
+				setTimeout(function () {
+					// Entferne span wieder aus der Auswahl
+					range.setEndBefore(span);
+					
+					// Selektiere Range (stelle ursprüngliche Auswahl wieder her)
+					selection.removeAllRanges();
+					selection.addRange(range);
+					
+					// Entferne span wieder aus dem DOM
+					removeSpan();
+				}, 0);
 				
 			} else if (selection.duplicate) {
 				
@@ -227,34 +178,31 @@ var SelectionMenu = (function () {
 				newRange.setEndPoint('StartToEnd', selection);
 				
 				// Befülle Menü-Span
-				span.innerHTML = instance.menuHTML;
+				span.innerHTML = instance.handler();
 				
-				// Füge das span-Element in die neue Range ein
+				// Fülle die neue Range mit dem span
 				newRange.pasteHTML(span.outerHTML);
 				
-				// Korrigiere Auswahl und setze sie auf die ursprüngliche Auswahl zurück,
-				// sodass das Menü nicht selektiert ist
+				// Schließe eingefügte Range in die Auswahl ein
+				selection.setEndPoint('EndToEnd', newRange);
+				
+				// Selektiere den Inhalt der Range
 				selection.select();
 				
 				// Da das Befüllen nicht über das DOM, sondern über serialisierten HTML-Code erfolgt,
-				// stelle die Referenz und das Event-Handling wieder her
+				// stelle die Referenz wieder her
 				span = document.getElementById(id);
-				instance.setupMenuEvents();
+				
+				// Entferne span wieder aus dem DOM
+				setTimeout(removeSpan, 0);
 				
 			} else {
 				// Keine Browser-Unterstützung für die benötigten Features
 				return;
 			}
 			
-			// Positioniere Menü
-			instance.position();
-		},
-		
-		position : function () {
-			span.style.marginTop = -(span.offsetHeight + 5) + 'px';
 		}
 	};
 	
-	// Gebe Konstruktor zurück
-	return SelectionMenu;
+	return CopyLink;
 })();
