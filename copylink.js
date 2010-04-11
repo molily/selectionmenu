@@ -1,6 +1,6 @@
 // Erzeuge einen privaten Scope durch eine anonyme Funktion,
 // speichere den Rückgabwert in einer globalen Variable
-var CopyLink = (function () {
+var CopyLink = (function (window, document) {
 	
 	var span = null;
 	var id = 'copylink';
@@ -122,8 +122,8 @@ var CopyLink = (function () {
 				
 				// Korrektur: Wenn von hinten nach vorne markiert wurde, drehe Start und Ende um
 				if (startNode.compareDocumentPosition(endNode) & 2) {
-					var startNode = endNode;
-					var endNode = range.startContainer;
+					startNode = endNode;
+					endNode = range.startContainer;
 				}
 				
 				// Hole Start- und End-Offset
@@ -157,7 +157,7 @@ var CopyLink = (function () {
 				selection.removeAllRanges();
 				selection.addRange(range);
 				
-				setTimeout(function () {
+				window.setTimeout(function () {
 					// Entferne span wieder aus der Auswahl
 					range.setEndBefore(span);
 					
@@ -194,7 +194,7 @@ var CopyLink = (function () {
 				span = document.getElementById(id);
 				
 				// Entferne span wieder aus dem DOM
-				setTimeout(removeSpan, 0);
+				window.setTimeout(removeSpan, 0);
 				
 			} else {
 				// Keine Browser-Unterstützung für die benötigten Features
@@ -205,4 +205,5 @@ var CopyLink = (function () {
 	};
 	
 	return CopyLink;
-})();
+	
+})(window, document);

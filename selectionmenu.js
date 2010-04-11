@@ -1,6 +1,6 @@
 // Erzeuge einen privaten Scope durch eine anonyme Funktion,
 // speichere den Rückgabwert in einer globalen Variable
-var SelectionMenu = (function () {
+var SelectionMenu = (function (window, document) {
 	
 	var id = 'selection-menu';
 	var span = null;
@@ -99,7 +99,7 @@ var SelectionMenu = (function () {
 				// angeklickt wurde und die Auswahl damit aufgehoben wurde
 				window.setTimeout(function () {
 					instance.hideIfNoSelection();
-				}, 1);
+				}, 0);
 				
 			});
 			
@@ -189,8 +189,8 @@ var SelectionMenu = (function () {
 				
 				// Korrektur: Wenn von hinten nach vorne markiert wurde, drehe Start und Ende um
 				if (startNode.compareDocumentPosition(endNode) & 2) {
-					var startNode = endNode;
-					var endNode = range.startContainer;
+					startNode = endNode;
+					endNode = range.startContainer;
 				}
 				
 				// Hole End-Offset
@@ -257,4 +257,5 @@ var SelectionMenu = (function () {
 	
 	// Gebe Konstruktor zurück
 	return SelectionMenu;
-})();
+	
+})(window, document);
