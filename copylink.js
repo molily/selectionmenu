@@ -1,9 +1,16 @@
+/*
+CopyLink 1.0
+http://github.com/molily/selectionmenu
+von molily (zapperlott@gmail.com, http://molily.de/)
+Lizenz: Public Domain / Kopieren, Verteilen und Aendern ohne Einschraenkungen erlaubt
+*/
+
 // Erzeuge einen privaten Scope durch eine anonyme Funktion,
 // speichere den Rückgabwert in einer globalen Variable
 var CopyLink = (function (window, document) {
 	
-	var span = null;
 	var id = 'copylink';
+	var span = null;
 	
 	// Geteilte private Helferfunktionen
 	
