@@ -55,7 +55,7 @@ var CopyLink = (function () {
 		instance.minimalSelection = options.minimalSelection || 20;
 		instance.container = options.container;
 		instance.handler = options.handler || function () {
-			'<br>Source: ' + location.href;
+			return '<br>Source: ' + location.href;
 		};
 		
 		// Initialisiere
