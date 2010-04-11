@@ -215,7 +215,7 @@ var SelectionMenu = (function (window, document) {
 				newRange.insertNode(span);
 				
 				// Korrigiere Auswahl, verhindere das Markieren des Menüs
-				selection.removeAllRanges();
+				selection.removeRange(range);
 				selection.addRange(range);
 				
 			} else if (selection.duplicate) {
