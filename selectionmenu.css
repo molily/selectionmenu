@@ -44,12 +44,9 @@
 	color: #111;
 	text-decoration: none;
 	font: 12px/1.4 arial, sans-serif;
+	cursor: pointer;
 }
 
 #selection-menu a:last-child {
 	border-bottom: 0;
-}
-
-#selection-menu a:hover {
-	cursor: pointer;
 }
