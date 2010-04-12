@@ -222,7 +222,11 @@ var SelectionMenu = (function (window, document) {
 				newRange.insertNode(span);
 				
 				// Korrigiere Auswahl, verhindere das Markieren des Menüs
-				selection.removeRange(range);
+				if (selection.removeRange) {
+					selection.removeRange(range);
+				} else {
+					selection.removeAllRanges();
+				}
 				selection.addRange(range);
 				
 			} else if (selection.duplicate) {
