@@ -22,6 +22,7 @@ SelectionMenu.addEvent(window, 'load', function () {
 	
 	new SelectionMenu({
 		container : document.getElementById('article'),
+		id : 'selection-menu',
 		menuHTML : '<a id="selection-menu-google">Google-Suche</a><a id="selection-menu-bing">Bing-Suche</a>',
 		handler : function (e) {
 			var target = e.target || e.srcElement,

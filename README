@@ -1,10 +1,137 @@
-Kleines Framework-unabhängiges JavaScript, welches beim Markieren von Text
-ein Kontextmenü anzeigt. Idee und Umsetzung ähnelt der auf nytimes.com.
-Das Script ist jedoch einfacher und universell einsetzbarer.
+Deutsche Beschreibung:
+----------------------
 
-Das Script nutzt DOM-Ranges bzw. TextRanges im IE. Es fügt ein Inline-Element
-ans Ende des markierten Textes ein. Das kann Links enthalten, z.B. um Wörter
-nachzuschlagen oder Begriffe zu suchen.
+SelectionMenu und CopyLink sind kleine, framework-unabhängige JavaScript.
+
+SelectionMenu zeigt beim Markieren von Text ein Kontextmenü an. Die Idee und
+Umsetzung ähnelt der auf nytimes.com. Das Script ist jedoch einfacher und universell
+einsetzbar.
+
+CopyLink fügt eine Quellenreferenz ein, wenn der Benutzer Text markiert und in die
+Zwischenablage kopiert. Wenn beispielsweise »Franz jagt im komplett verwahrlosten Taxi«
+kopiert wird, so wird die URL der aktuellen Webseite an den kopierten Text angehangen:
+
+»Franz jagt im komplett verwahrlosten Taxi
+Quelle: http://example.net/article1234«
+
+Beide Scripte verwenden W3C DOM Range
+<http://www.w3.org/TR/DOM-Level-2-Traversal-Range/ranges.html> in modernen Browsern sowie
+Microsoft TextRanges <http://msdn.microsoft.com/en-us/library/ms535872(v=vs.85).aspx>
+für ältere Internet-Explorer-Versionen.
+
+Ausführliche Dokumentation:
+http://molily.de/weblog/selectionmenu-copylink
 
 Autor: Mathias Schäfer (molily) <zapperlott@gmail.com>
 Lizenz: Public Domain
+
+
+English Description:
+--------------------
+
+SelectionMenu and CopyLink are small self-contained, framework-agnostic scripts
+which demonstrate the abilities of the JavaScript APIs DOM Range and Microsoft
+Text Ranges.
+
+SelectionMenu shows a context menu when the user selects some text on the page.
+This menu may offer a search feature, dictionary lookup, post to Facebook or similar.
+The idea and the implementation resembles the selection context menu on nytimes.com,
+but the script is way simpler and easy to integrate.
+
+CopyLink inserts a source reference when the user copys a piece of text into the
+clipboard. For example, if the user selects the text “The quick brown fox” and copys
+it, the URL of the current page will be appended:
+
+“The quick brown fox
+Source: http://example.net/article1234”
+
+Both scripts are using W3C DOM Range
+<http://www.w3.org/TR/DOM-Level-2-Traversal-Range/ranges.html> in modern browsers
+and Microsoft TextRanges <http://msdn.microsoft.com/en-us/library/ms535872(v=vs.85).aspx>
+as a fallback for older Internet Explorer versions.
+
+Author: Mathias Schäfer (molily) <zapperlott@gmail.com>
+License: Public Domain
+
+
+SelectionMenu Usage:
+--------------------
+
+Create an instance of SelectionMenu by calling “new SelectionMenu”.
+
+Pass an object literal with the following options:
+  container (DOM element):
+    The element where the copy event is observed. Normally that's
+    the main text container.
+  menuHTML (string):
+    A string of HTML for the menu e.g. a list of links.
+  handler (function):
+    A handler function which is called when the user clicks on the menu.
+    Use the passed click event to access the click link and respond to
+    the user's action.
+  minimalSelection (number, optional):
+    Only display the menu if the selected text has at least this length.
+    Defaults to 5 characters.
+  id (string, optional):
+    The ID of the menu element which is inserted. Defaults to “selection-menu”.
+
+Example:
+--------
+
+This observes copy events at the element with the ID “article”. It inserts a menu
+with two links which both have IDs to recognize them. In the handler function, the
+selected text is read. Depending on the clicked link, the selected text is
+looked up on Google or Bing.
+
+new SelectionMenu({
+	container : document.getElementById('article'),
+	menuHTML : '<a id="selection-menu-google">Google Search</a><a id="selection-menu-bing">Bing Search</a>',
+	handler : function (e) {
+		var target = e.target || e.srcElement,
+			id = target.id,
+			selectedText = this.selectedText,
+			query = encodeURI(selectedText.replace(/\s/g, '+')),
+			searchURI;
+		
+		if (id == 'selection-menu-google') {
+			searchURI = 'http://www.google.com/search?ie=utf-8&q=';
+		} else if (id == 'selection-menu-bing') {
+			searchURI = 'http://www.bing.com/search?q=';
+		}
+		
+		location.href = searchURI + query;
+	}
+});
+
+
+CopyLink Usage:
+---------------
+
+Create an instance of SelectionMenu by calling “new CopyLink”.
+
+Pass an object literal with the following options:
+  container (DOM element):
+    The element where the copy event is observed. Normally that's
+    the main text container.
+  handler (function, optional):
+    A handler function which is called when the user copys some text.
+    This function should return a string which is appended to the
+    copied text.
+    Defaults to '<br>Source: ' + location.href, e.g. “Source:” and the
+    URL of the current document.
+  minimalSelection (number, optional):
+    Only append a source reference if the selected text has at least this length.
+    Defaults to 20 characters.
+
+Example:
+--------
+
+This observes copy events at the element with the ID “article”. It appends the
+string “Source: <URL>” when the user copys text which is longer than 20 characters.
+
+new CopyLink({
+	container : document.getElementById('article'),
+	handler : function () {
+		return '<br>Source: ' + location.href;
+	}
+});
