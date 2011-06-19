@@ -1,7 +1,7 @@
 Deutsche Beschreibung:
 ----------------------
 
-SelectionMenu und CopyLink sind kleine, framework-unabhängige JavaScript.
+SelectionMenu und CopyLink sind kleine, framework-unabhängige JavaScripte.
 
 SelectionMenu zeigt beim Markieren von Text ein Kontextmenü an. Die Idee und
 Umsetzung ähnelt der auf nytimes.com. Das Script ist jedoch einfacher und universell
@@ -31,7 +31,7 @@ English Description:
 
 SelectionMenu and CopyLink are small self-contained, framework-agnostic scripts
 which demonstrate the abilities of the JavaScript APIs DOM Range and Microsoft
-Text Ranges.
+TextRanges.
 
 SelectionMenu shows a context menu when the user selects some text on the page.
 This menu may offer a search feature, dictionary lookup, post to Facebook or similar.
@@ -84,23 +84,23 @@ selected text is read. Depending on the clicked link, the selected text is
 looked up on Google or Bing.
 
 new SelectionMenu({
-	container : document.getElementById('article'),
-	menuHTML : '<a id="selection-menu-google">Google Search</a><a id="selection-menu-bing">Bing Search</a>',
-	handler : function (e) {
-		var target = e.target || e.srcElement,
-			id = target.id,
-			selectedText = this.selectedText,
-			query = encodeURI(selectedText.replace(/\s/g, '+')),
-			searchURI;
-		
-		if (id == 'selection-menu-google') {
-			searchURI = 'http://www.google.com/search?ie=utf-8&q=';
-		} else if (id == 'selection-menu-bing') {
-			searchURI = 'http://www.bing.com/search?q=';
-		}
-		
-		location.href = searchURI + query;
-	}
+  container : document.getElementById('article'),
+  menuHTML : '<a id="selection-menu-google">Google Search</a><a id="selection-menu-bing">Bing Search</a>',
+  handler : function (e) {
+    var target = e.target || e.srcElement,
+      id = target.id,
+      selectedText = this.selectedText,
+      query = encodeURI(selectedText.replace(/\s/g, '+')),
+      searchURI;
+    
+    if (id == 'selection-menu-google') {
+      searchURI = 'http://www.google.com/search?ie=utf-8&q=';
+    } else if (id == 'selection-menu-bing') {
+      searchURI = 'http://www.bing.com/search?q=';
+    }
+    
+    location.href = searchURI + query;
+  }
 });
 
 
@@ -130,8 +130,8 @@ This observes copy events at the element with the ID “article”. It appends t
 string “Source: <URL>” when the user copys text which is longer than 20 characters.
 
 new CopyLink({
-	container : document.getElementById('article'),
-	handler : function () {
-		return '<br>Source: ' + location.href;
-	}
+  container : document.getElementById('article'),
+  handler : function () {
+    return '<br>Source: ' + location.href;
+  }
 });

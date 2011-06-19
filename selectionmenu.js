@@ -1,5 +1,5 @@
 /*
-SelectionMenu 1.0
+SelectionMenu 1.1
 http://github.com/molily/selectionmenu
 by molily (zapperlott@gmail.com, http://molily.de/)
 
@@ -252,7 +252,7 @@ var SelectionMenu = (function (window, document) {
 				// EN: If the end node is an element, use its last text node as the end offset
 				// DE: Falls der Endknoten ein Element ist, nehme das Ende des letzten Textknoten
 				if (endNode.nodeType == 1) {
-					var endNode = endNode.lastChild;
+					endNode = endNode.lastChild;
 					if (!endNode || endNode.nodeType != 3) {
 						return;
 					}
