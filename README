@@ -22,7 +22,7 @@ für ältere Internet-Explorer-Versionen.
 Ausführliche Dokumentation:
 http://molily.de/weblog/selectionmenu-copylink
 
-Autor: Mathias Schäfer (molily) <zapperlott@gmail.com>
+Autor: Mathias Schäfer (molily) <molily@mailbox.org>
 Lizenz: Public Domain
 
 
@@ -50,7 +50,7 @@ Both scripts are using W3C DOM Range
 and Microsoft TextRanges <http://msdn.microsoft.com/en-us/library/ms535872(v=vs.85).aspx>
 as a fallback for older Internet Explorer versions.
 
-Author: Mathias Schäfer (molily) <zapperlott@gmail.com>
+Author: Mathias Schäfer (molily) <molily@mailbox.org>
 License: Public Domain
 
 
@@ -92,13 +92,13 @@ new SelectionMenu({
       selectedText = this.selectedText,
       query = encodeURI(selectedText.replace(/\s/g, '+')),
       searchURI;
-    
+
     if (id == 'selection-menu-google') {
       searchURI = 'http://www.google.com/search?ie=utf-8&q=';
     } else if (id == 'selection-menu-bing') {
       searchURI = 'http://www.bing.com/search?q=';
     }
-    
+
     location.href = searchURI + query;
   }
 });
